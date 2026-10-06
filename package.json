@@ -9,27 +9,137 @@
   "engines": {
     "vscode": "^1.90.0"
   },
-  "categories": ["SCM Providers"],
+  "categories": [
+    "SCM Providers"
+  ],
   "main": "./dist/extension.js",
-  "activationEvents": ["onStartupFinished"],
-  "extensionDependencies": ["vscode.git"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
   "contributes": {
     "commands": [
-      { "command": "jbgit.showBranches", "title": "Branches…", "category": "Git (JB)", "icon": "$(git-branch)" },
-      { "command": "jbgit.updateProject", "title": "Update Project…", "category": "Git (JB)", "icon": "$(arrow-down)" },
-      { "command": "jbgit.push", "title": "Push…", "category": "Git (JB)", "icon": "$(arrow-up)" },
-      { "command": "jbgit.newBranch", "title": "New Branch…", "category": "Git (JB)" },
-      { "command": "jbgit.checkoutRevision", "title": "Checkout Tag or Revision…", "category": "Git (JB)" },
-      { "command": "jbgit.fetch", "title": "Fetch", "category": "Git (JB)" },
-      { "command": "jbgit.operationActions", "title": "Merge/Rebase in Progress: Continue or Abort…", "category": "Git (JB)" },
-      { "command": "jbgit.showConsole", "title": "Show Git Console", "category": "Git (JB)" }
+      {
+        "command": "jbgit.showBranches",
+        "title": "Branches…",
+        "category": "Git (JB)",
+        "icon": "$(git-branch)"
+      },
+      {
+        "command": "jbgit.updateProject",
+        "title": "Update Project…",
+        "category": "Git (JB)",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "jbgit.push",
+        "title": "Push…",
+        "category": "Git (JB)",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "jbgit.newBranch",
+        "title": "New Branch…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.checkoutRevision",
+        "title": "Checkout Tag or Revision…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.fetch",
+        "title": "Fetch",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.operationActions",
+        "title": "Merge/Rebase in Progress: Continue or Abort…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.showConsole",
+        "title": "Show Git Console",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.commit",
+        "title": "Commit…",
+        "category": "Git (JB)",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "jbgit.commit.refresh",
+        "title": "Refresh",
+        "category": "Git (JB)",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "jbgit.commit.openChange",
+        "title": "Show Diff",
+        "category": "Git (JB)",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "jbgit.commit.openFile",
+        "title": "Open File",
+        "category": "Git (JB)",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "jbgit.commit.rollback",
+        "title": "Rollback…",
+        "category": "Git (JB)",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "jbgit.commit.newChangelist",
+        "title": "New Changelist…",
+        "category": "Git (JB)",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "jbgit.commit.moveToChangelist",
+        "title": "Move to Another Changelist…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.commit.setActiveChangelist",
+        "title": "Set Active Changelist",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.commit.renameChangelist",
+        "title": "Rename Changelist…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.commit.deleteChangelist",
+        "title": "Delete Changelist…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.commit.deleteUnversioned",
+        "title": "Delete…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.commit.addToGitignore",
+        "title": "Add to .gitignore",
+        "category": "Git (JB)"
+      }
     ],
     "configuration": {
       "title": "Git (JetBrains style)",
       "properties": {
         "jbGit.updateMethod": {
           "type": "string",
-          "enum": ["merge", "rebase"],
+          "enum": [
+            "merge",
+            "rebase"
+          ],
           "default": "merge",
           "description": "How Update Project integrates incoming changes into the current branch."
         },
@@ -39,19 +149,173 @@
           "description": "How many recently checked-out branches the Branches popup shows."
         }
       }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "jbgit",
+          "title": "Commit (JB)",
+          "icon": "media/commit.svg"
+        }
+      ]
+    },
+    "views": {
+      "jbgit": [
+        {
+          "id": "jbgit.changes",
+          "name": "Changes"
+        },
+        {
+          "type": "webview",
+          "id": "jbgit.commitMessage",
+          "name": "Commit Message"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "jbgit.commit.refresh",
+          "when": "view == jbgit.changes",
+          "group": "navigation@1"
+        },
+        {
+          "command": "jbgit.commit.rollback",
+          "when": "view == jbgit.changes",
+          "group": "navigation@2"
+        },
+        {
+          "command": "jbgit.commit.newChangelist",
+          "when": "view == jbgit.changes",
+          "group": "navigation@3"
+        },
+        {
+          "command": "jbgit.updateProject",
+          "when": "view == jbgit.changes",
+          "group": "1_vcs@1"
+        },
+        {
+          "command": "jbgit.push",
+          "when": "view == jbgit.changes",
+          "group": "1_vcs@2"
+        },
+        {
+          "command": "jbgit.showBranches",
+          "when": "view == jbgit.changes",
+          "group": "1_vcs@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "jbgit.commit.openFile",
+          "when": "view == jbgit.changes && viewItem =~ /^file\\.(modified|added|renamed|untracked|conflict)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "jbgit.commit.rollback",
+          "when": "view == jbgit.changes && viewItem =~ /^file\\.(modified|added|deleted|renamed)$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "jbgit.commit.openChange",
+          "when": "view == jbgit.changes && viewItem =~ /^file\\./",
+          "group": "1_open@1"
+        },
+        {
+          "command": "jbgit.commit.openFile",
+          "when": "view == jbgit.changes && viewItem =~ /^file\\.(modified|added|renamed|untracked|conflict)$/",
+          "group": "1_open@2"
+        },
+        {
+          "command": "jbgit.commit.rollback",
+          "when": "view == jbgit.changes && (viewItem =~ /^file\\.(modified|added|deleted|renamed)$/ || viewItem =~ /^changelist/)",
+          "group": "2_change@1"
+        },
+        {
+          "command": "jbgit.commit.moveToChangelist",
+          "when": "view == jbgit.changes && viewItem =~ /^file\\.(modified|added|deleted|renamed)$/",
+          "group": "2_change@2"
+        },
+        {
+          "command": "jbgit.commit.deleteUnversioned",
+          "when": "view == jbgit.changes && (viewItem == file.untracked || viewItem == unversionedGroup)",
+          "group": "2_change@3"
+        },
+        {
+          "command": "jbgit.commit.addToGitignore",
+          "when": "view == jbgit.changes && (viewItem == file.untracked || viewItem == unversionedGroup)",
+          "group": "2_change@4"
+        },
+        {
+          "command": "jbgit.commit.setActiveChangelist",
+          "when": "view == jbgit.changes && viewItem == changelist",
+          "group": "3_changelist@1"
+        },
+        {
+          "command": "jbgit.commit.renameChangelist",
+          "when": "view == jbgit.changes && viewItem =~ /^changelist/",
+          "group": "3_changelist@2"
+        },
+        {
+          "command": "jbgit.commit.deleteChangelist",
+          "when": "view == jbgit.changes && viewItem =~ /^changelist/",
+          "group": "3_changelist@3"
+        },
+        {
+          "command": "jbgit.commit.newChangelist",
+          "when": "view == jbgit.changes && viewItem =~ /^changelist/",
+          "group": "3_changelist@4"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "jbgit.commit.openChange",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.openFile",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.moveToChangelist",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.setActiveChangelist",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.renameChangelist",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.deleteChangelist",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.deleteUnversioned",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.commit.addToGitignore",
+          "when": "false"
+        }
+      ]
     }
   },
   "scripts": {
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "typecheck": "tsc --noEmit",
-    "test:unit": "tsc && mocha \"out/test/unit/**/*.test.js\"",
-    "test": "npm run typecheck && npm run test:unit"
+    "test:unit": "tsc && mocha \"out/test/unit/**/*.test.js\" \"out/test/git/**/*.test.js\"",
+    "test": "npm run typecheck && npm run test:unit",
+    "test:e2e": "npm run build && tsc && env -u WAYLAND_DISPLAY -u XDG_SESSION_TYPE xvfb-run -a node out/test/e2e/runTest.js"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.20.5",
     "@types/vscode": "~1.90.0",
+    "@vscode/test-electron": "^3.1.0",
     "esbuild": "^0.28.2",
     "mocha": "^12.0.3",
     "typescript": "~5.9.3"

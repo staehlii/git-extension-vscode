@@ -4,6 +4,8 @@ import * as ops from './branches/branchService';
 import { Favorites } from './branches/favorites';
 import { showOperationActions } from './branches/operationActions';
 import { BranchStatusBar } from './branches/statusBar';
+import { CommitFn, registerCommitWindow } from './commit/commitCommands';
+import { CommitWindow } from './commit/commitWindow';
 import type { GitExtension } from './git/gitApi';
 import { GitCli } from './git/gitCli';
 import { Repo } from './git/repo';
@@ -11,11 +13,17 @@ import { RepoManager } from './git/repoManager';
 import { RevisionContentProvider, SCHEME } from './git/revisionContent';
 import { gitConsole, showGitError } from './util/ui';
 
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
+/** Returned from activate(); used by the end-to-end tests. */
+export interface ExtensionApi {
+  commitWindow: CommitWindow;
+  commit: CommitFn;
+}
+
+export async function activate(context: vscode.ExtensionContext): Promise<ExtensionApi | undefined> {
   const gitExtension = vscode.extensions.getExtension<GitExtension>('vscode.git');
   if (!gitExtension) {
     vscode.window.showErrorMessage('Git (JB): the built-in Git extension is not available.');
-    return;
+    return undefined;
   }
   const api = (gitExtension.isActive ? gitExtension.exports : await gitExtension.activate()).getAPI(1);
   const cli = new GitCli(api.git.path, (line) => gitConsole().appendLine(line));
@@ -48,6 +56,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('jbgit.operationActions', withRepo('Continue/Abort', showOperationActions)),
     vscode.commands.registerCommand('jbgit.showConsole', () => gitConsole().show()),
   );
+
+  const commitWindow = new CommitWindow(repos, context.workspaceState);
+  context.subscriptions.push(commitWindow);
+  const commit = registerCommitWindow(context, commitWindow);
+  return { commitWindow, commit };
 }
 
 export function deactivate(): void {}

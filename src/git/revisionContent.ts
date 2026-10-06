@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 import { GitCli } from './gitCli';
 
 export const SCHEME = 'jbgit';
+/** Ref value that always yields empty content (e.g. the right side of a deleted file's diff). */
+export const EMPTY_REF = '<empty>';
 
 interface RevisionQuery {
   root: string;
@@ -22,6 +24,9 @@ export class RevisionContentProvider implements vscode.TextDocumentContentProvid
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     const { root, ref } = JSON.parse(uri.query) as RevisionQuery;
+    if (ref === EMPTY_REF) {
+      return '';
+    }
     const rel = path.relative(root, uri.fsPath).split(path.sep).join('/');
     const res = await this.cli.exec(root, ['show', `${ref}:${rel}`], { allowFailure: true });
     return res.exitCode === 0 ? res.stdout : '';
