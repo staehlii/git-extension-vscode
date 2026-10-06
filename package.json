@@ -1,0 +1,59 @@
+{
+  "name": "jb-git",
+  "displayName": "Git (JetBrains style)",
+  "description": "JetBrains-style Git workflow: branches popup, changelists commit window, log graph, conflicts and interactive rebase.",
+  "version": "0.0.1",
+  "publisher": "scewo-internal",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["SCM Providers"],
+  "main": "./dist/extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "extensionDependencies": ["vscode.git"],
+  "contributes": {
+    "commands": [
+      { "command": "jbgit.showBranches", "title": "Branches…", "category": "Git (JB)", "icon": "$(git-branch)" },
+      { "command": "jbgit.updateProject", "title": "Update Project…", "category": "Git (JB)", "icon": "$(arrow-down)" },
+      { "command": "jbgit.push", "title": "Push…", "category": "Git (JB)", "icon": "$(arrow-up)" },
+      { "command": "jbgit.newBranch", "title": "New Branch…", "category": "Git (JB)" },
+      { "command": "jbgit.checkoutRevision", "title": "Checkout Tag or Revision…", "category": "Git (JB)" },
+      { "command": "jbgit.fetch", "title": "Fetch", "category": "Git (JB)" },
+      { "command": "jbgit.operationActions", "title": "Merge/Rebase in Progress: Continue or Abort…", "category": "Git (JB)" },
+      { "command": "jbgit.showConsole", "title": "Show Git Console", "category": "Git (JB)" }
+    ],
+    "configuration": {
+      "title": "Git (JetBrains style)",
+      "properties": {
+        "jbGit.updateMethod": {
+          "type": "string",
+          "enum": ["merge", "rebase"],
+          "default": "merge",
+          "description": "How Update Project integrates incoming changes into the current branch."
+        },
+        "jbGit.recentBranchesLimit": {
+          "type": "number",
+          "default": 5,
+          "description": "How many recently checked-out branches the Branches popup shows."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "tsc && mocha \"out/test/unit/**/*.test.js\"",
+    "test": "npm run typecheck && npm run test:unit"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.5",
+    "@types/vscode": "~1.90.0",
+    "esbuild": "^0.28.2",
+    "mocha": "^12.0.3",
+    "typescript": "~5.9.3"
+  }
+}
