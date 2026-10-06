@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "noEmit": true
+  },
+  "include": ["src/webview", "src/log/protocol.ts", "src/log/graphLayout.ts", "src/git/changedFiles.ts"]
+}

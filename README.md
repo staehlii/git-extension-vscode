@@ -6,7 +6,7 @@ Internal extension that brings the JetBrains Git workflow to VS Code. Built in p
 - [x] Phase 1: scaffold, git CLI wrapper, repo tracking, `jbgit:` revision documents, Git Console (output channel)
 - [x] Phase 2: Branches popup + status-bar branch widget, Update Project, Push dialog, Smart Checkout, Continue/Abort
 - [x] Phase 3: Commit window + changelists
-- [ ] Phase 4: Git Log graph
+- [x] Phase 4: Git Log graph
 - [ ] Phase 5: Conflicts view + interactive rebase
 
 ## Run
@@ -29,6 +29,20 @@ Activity bar icon **Commit (JB)** (or `Git (JB): Commit…`):
 - Only the ticked files are committed (`git commit --only`); anything else you staged stays staged.
   During a merge, git requires committing all changes together, and the panel says so.
 - Changelists are stored per repository in VS Code's workspace state.
+
+## Git Log
+Bottom panel tab **Git (JB) → Log** (or `Git (JB): Show Git Log`), like JetBrains' Git tool window:
+- Commit table with branch graph, branch/tag badges (filled = checked-out branch), author, date and hash.
+  Click, Ctrl+click, Shift+click and arrow keys select commits; more commits load while scrolling.
+- Toolbar filters: text or hash, Branch, User, Date and Paths. With text/user/date/path filters the
+  graph is hidden, because those filters leave gaps in the history (JetBrains does the same).
+- Details pane: changed files (click one for its diff against the first parent), full message, author,
+  committer and the branches containing the commit. Drag the splitter to resize.
+- Right-click a commit: Copy Revision Number, Checkout Revision, New Branch…, New Tag…, Cherry-Pick,
+  Revert Commit, Reset Current Branch to Here…, Undo Commit… and Edit Commit Message… (HEAD only),
+  Compare with Local and Create Patch…. Cherry-pick, revert and patch work on multiple selected commits.
+- **Show History for File**: right-click a file in the Explorer, an editor tab or the editor.
+- The log reloads automatically when a branch, tag or HEAD moves.
 
 ## Keybindings (optional)
 No default keybindings ship, because JetBrains shortcuts collide with VS Code built-ins

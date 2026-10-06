@@ -11,12 +11,14 @@ import { GitCli } from './git/gitCli';
 import { Repo } from './git/repo';
 import { RepoManager } from './git/repoManager';
 import { RevisionContentProvider, SCHEME } from './git/revisionContent';
+import { LogView, registerLogView } from './log/logView';
 import { gitConsole, showGitError } from './util/ui';
 
 /** Returned from activate(); used by the end-to-end tests. */
 export interface ExtensionApi {
   commitWindow: CommitWindow;
   commit: CommitFn;
+  log: LogView;
 }
 
 export async function activate(context: vscode.ExtensionContext): Promise<ExtensionApi | undefined> {
@@ -60,7 +62,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<Extens
   const commitWindow = new CommitWindow(repos, context.workspaceState);
   context.subscriptions.push(commitWindow);
   const commit = registerCommitWindow(context, commitWindow);
-  return { commitWindow, commit };
+  const log = registerLogView(context, repos);
+  return { commitWindow, commit, log };
 }
 
 export function deactivate(): void {}

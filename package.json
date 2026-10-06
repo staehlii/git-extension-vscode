@@ -129,6 +129,72 @@
         "command": "jbgit.commit.addToGitignore",
         "title": "Add to .gitignore",
         "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.show",
+        "title": "Show Git Log",
+        "category": "Git (JB)",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "jbgit.log.showFileHistory",
+        "title": "Show History for File",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.copyRevision",
+        "title": "Copy Revision Number",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.checkout",
+        "title": "Checkout Revision",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.newBranch",
+        "title": "New Branch…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.newTag",
+        "title": "New Tag…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.cherryPick",
+        "title": "Cherry-Pick",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.revert",
+        "title": "Revert Commit",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.resetToHere",
+        "title": "Reset Current Branch to Here…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.undoCommit",
+        "title": "Undo Commit…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.reword",
+        "title": "Edit Commit Message…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.compareWithLocal",
+        "title": "Compare with Local",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.createPatch",
+        "title": "Create Patch…",
+        "category": "Git (JB)"
       }
     ],
     "configuration": {
@@ -157,6 +223,13 @@
           "title": "Commit (JB)",
           "icon": "media/commit.svg"
         }
+      ],
+      "panel": [
+        {
+          "id": "jbgitPanel",
+          "title": "Git (JB)",
+          "icon": "media/commit.svg"
+        }
       ]
     },
     "views": {
@@ -169,6 +242,13 @@
           "type": "webview",
           "id": "jbgit.commitMessage",
           "name": "Commit Message"
+        }
+      ],
+      "jbgitPanel": [
+        {
+          "type": "webview",
+          "id": "jbgit.log",
+          "name": "Log"
         }
       ]
     },
@@ -203,6 +283,11 @@
           "command": "jbgit.showBranches",
           "when": "view == jbgit.changes",
           "group": "1_vcs@3"
+        },
+        {
+          "command": "jbgit.log.show",
+          "when": "view == jbgit.changes",
+          "group": "1_vcs@4"
         }
       ],
       "view/item/context": [
@@ -299,6 +384,128 @@
         {
           "command": "jbgit.commit.addToGitignore",
           "when": "false"
+        },
+        {
+          "command": "jbgit.log.copyRevision",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.checkout",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.newBranch",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.newTag",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.cherryPick",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.revert",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.resetToHere",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.undoCommit",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.reword",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.compareWithLocal",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.createPatch",
+          "when": "false"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "jbgit.log.copyRevision",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "1_copy@1"
+        },
+        {
+          "command": "jbgit.log.checkout",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "2_checkout@1"
+        },
+        {
+          "command": "jbgit.log.newBranch",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "2_checkout@2"
+        },
+        {
+          "command": "jbgit.log.newTag",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "2_checkout@3"
+        },
+        {
+          "command": "jbgit.log.cherryPick",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "3_apply@1"
+        },
+        {
+          "command": "jbgit.log.revert",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "3_apply@2"
+        },
+        {
+          "command": "jbgit.log.resetToHere",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "4_history@1"
+        },
+        {
+          "command": "jbgit.log.undoCommit",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit' && isHead",
+          "group": "4_history@2"
+        },
+        {
+          "command": "jbgit.log.reword",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit' && isHead",
+          "group": "4_history@3"
+        },
+        {
+          "command": "jbgit.log.compareWithLocal",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "5_compare@1"
+        },
+        {
+          "command": "jbgit.log.createPatch",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "5_compare@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "jbgit.log.showFileHistory",
+          "when": "resourceScheme == file && !explorerResourceIsFolder",
+          "group": "7_jbgit@1"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "jbgit.log.showFileHistory",
+          "when": "resourceScheme == file",
+          "group": "7_jbgit@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "jbgit.log.showFileHistory",
+          "when": "resourceScheme == file",
+          "group": "9_jbgit@1"
         }
       ]
     }
@@ -306,7 +513,7 @@
   "scripts": {
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
     "test:unit": "tsc && mocha \"out/test/unit/**/*.test.js\" \"out/test/git/**/*.test.js\"",
     "test": "npm run typecheck && npm run test:unit",
     "test:e2e": "npm run build && tsc && env -u WAYLAND_DISPLAY -u XDG_SESSION_TYPE xvfb-run -a node out/test/e2e/runTest.js"

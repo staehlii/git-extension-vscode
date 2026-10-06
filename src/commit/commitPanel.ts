@@ -159,7 +159,7 @@ export class CommitPanel implements vscode.WebviewViewProvider, vscode.Disposabl
   button:hover:not(:disabled) { background: var(--vscode-button-hoverBackground); }
   button.secondary { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground); }
   button.secondary:hover:not(:disabled) { background: var(--vscode-button-secondaryHoverBackground); }
-  button.link { background: none; color: var(--vscode-textLink-foreground); padding: 2px 4px; }
+  button.link { background: none; border-color: transparent; color: var(--vscode-textLink-foreground); padding: 2px 4px; }
   button.link:hover:not(:disabled) { background: none; text-decoration: underline; }
   button:disabled { opacity: 0.5; cursor: default; }
   .info { color: var(--vscode-descriptionForeground); }

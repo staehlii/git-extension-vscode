@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { commitItem, filesBetween, listCommits, pickAndDiffFiles, showCommitChanges } from '../git/commitPicker';
+import { commitItem, pickAndDiffFiles, showCommitChanges } from '../git/commitPicker';
+import { filesBetween, listCommits } from '../git/history';
 import { GitError } from '../git/gitCli';
 import { Repo } from '../git/repo';
 import { confirm, runWithProgress, showGitError } from '../util/ui';
@@ -42,7 +43,7 @@ async function reportStoppedOperation(repo: Repo, title: string): Promise<boolea
 }
 
 /** Runs a git operation that may stop with conflicts (merge, rebase, pull, cherry-pick). */
-async function runConflictAware(repo: Repo, title: string, args: string[]): Promise<boolean> {
+export async function runConflictAware(repo: Repo, title: string, args: string[]): Promise<boolean> {
   try {
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title }, () => repo.exec(args));
     return true;
@@ -59,7 +60,7 @@ function isOverwriteError(e: unknown): boolean {
 }
 
 /** Checkout with JetBrains-style "Smart Checkout" (stash, checkout, unstash) when local changes block it. */
-async function checkoutArgs(repo: Repo, args: string[], label: string): Promise<boolean> {
+export async function checkoutRef(repo: Repo, args: string[], label: string): Promise<boolean> {
   const title = `Checkout ${label}`;
   try {
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title }, () => repo.exec(args));
@@ -101,13 +102,13 @@ async function checkoutArgs(repo: Repo, args: string[], label: string): Promise<
 
 export async function checkout(repo: Repo, branch: BranchInfo, all: BranchInfo[]): Promise<void> {
   if (branch.kind === 'local') {
-    await checkoutArgs(repo, ['checkout', branch.name], branch.name);
+    await checkoutRef(repo, ['checkout', branch.name], branch.name);
     return;
   }
   const local = localNameForRemote(branch);
   const existing = all.find((b) => b.kind === 'local' && b.name === local);
   if (!existing) {
-    await checkoutArgs(repo, ['checkout', '-b', local, '--track', branch.name], branch.name);
+    await checkoutRef(repo, ['checkout', '-b', local, '--track', branch.name], branch.name);
     return;
   }
   const choice = await vscode.window.showWarningMessage(
@@ -117,9 +118,9 @@ export async function checkout(repo: Repo, branch: BranchInfo, all: BranchInfo[]
     `Reset '${local}' to '${branch.name}'`,
   );
   if (choice === `Checkout '${local}'`) {
-    await checkoutArgs(repo, ['checkout', local], local);
+    await checkoutRef(repo, ['checkout', local], local);
   } else if (choice?.startsWith('Reset')) {
-    await checkoutArgs(repo, ['checkout', '-B', local, '--track', branch.name], branch.name);
+    await checkoutRef(repo, ['checkout', '-B', local, '--track', branch.name], branch.name);
   }
 }
 
@@ -136,7 +137,7 @@ export async function checkoutRevision(repo: Repo): Promise<void> {
   });
   qp.dispose();
   if (ref) {
-    await checkoutArgs(repo, ['checkout', ref], ref);
+    await checkoutRef(repo, ['checkout', ref], ref);
   }
 }
 
@@ -159,7 +160,7 @@ export async function newBranch(repo: Repo, startPoint?: string): Promise<void> 
   if (startPoint) {
     args.push(startPoint);
   }
-  await checkoutArgs(repo, args, name.trim());
+  await checkoutRef(repo, args, name.trim());
 }
 
 export async function merge(repo: Repo, branch: BranchInfo, current: string): Promise<void> {
