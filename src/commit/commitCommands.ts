@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as branchOps from '../branches/branchService';
+import { OPERATION_NOUN } from '../git/repo';
 import { EMPTY_REF, revisionUri } from '../git/revisionContent';
 import { confirm, runWithProgress, showGitError } from '../util/ui';
 import { ChangesNode, ChangesTreeProvider } from './changesTree';
@@ -12,7 +13,6 @@ import { MessageStore } from './messageStore';
 import { FileChange } from './statusParser';
 
 const plural = (n: number, word = 'file') => `${n} ${word}${n === 1 ? '' : 's'}`;
-const OPERATION_NOUN = { merging: 'merge', 'cherry-picking': 'cherry-pick', reverting: 'revert' } as const;
 
 export type CommitFn = (message: string, amend: boolean, push: boolean) => Promise<boolean>;
 
@@ -228,8 +228,10 @@ async function openChange(cw: CommitWindow, f: FileChange): Promise<void> {
     vscode.commands.executeCommand('vscode.diff', left, right, `${name} (${title})`, { preview: true });
   switch (f.kind) {
     case 'untracked':
-    case 'conflict':
       await vscode.commands.executeCommand('vscode.open', fileUri);
+      return;
+    case 'conflict':
+      await vscode.commands.executeCommand('git.openMergeEditor', fileUri);
       return;
     case 'deleted':
       await diff(revisionUri(root, abs, 'HEAD'), revisionUri(root, abs, EMPTY_REF), 'Deleted');

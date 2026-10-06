@@ -14,16 +14,19 @@ const builds = [
     target: 'node20',
     sourcemap: true,
   },
-  {
-    // Git Log webview
-    entryPoints: ['src/webview/log/main.ts'],
+  ...[
+    ['src/webview/log/main.ts', 'dist/webview/log.js'],
+    ['src/webview/rebase/main.ts', 'dist/webview/rebase.js'],
+  ].map(([entry, outfile]) => ({
+    // Webviews
+    entryPoints: [entry],
     bundle: true,
-    outfile: 'dist/webview/log.js',
+    outfile,
     format: 'iife',
     platform: 'browser',
     target: 'es2022',
     sourcemap: true,
-  },
+  })),
 ];
 
 (async () => {

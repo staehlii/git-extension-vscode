@@ -195,6 +195,43 @@
         "command": "jbgit.log.createPatch",
         "title": "Create Patch…",
         "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.resolveConflicts",
+        "title": "Resolve Conflicts…",
+        "category": "Git (JB)",
+        "icon": "$(git-merge)"
+      },
+      {
+        "command": "jbgit.conflicts.merge",
+        "title": "Merge…",
+        "category": "Git (JB)",
+        "icon": "$(git-merge)"
+      },
+      {
+        "command": "jbgit.conflicts.acceptYours",
+        "title": "Accept Yours",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.conflicts.acceptTheirs",
+        "title": "Accept Theirs",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.conflicts.markResolved",
+        "title": "Mark as Resolved",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.log.interactiveRebase",
+        "title": "Interactively Rebase from Here…",
+        "category": "Git (JB)"
+      },
+      {
+        "command": "jbgit.interactiveRebase",
+        "title": "Interactive Rebase…",
+        "category": "Git (JB)"
       }
     ],
     "configuration": {
@@ -350,6 +387,36 @@
           "command": "jbgit.commit.newChangelist",
           "when": "view == jbgit.changes && viewItem =~ /^changelist/",
           "group": "3_changelist@4"
+        },
+        {
+          "command": "jbgit.conflicts.merge",
+          "when": "view == jbgit.changes && viewItem == file.conflict",
+          "group": "inline@0"
+        },
+        {
+          "command": "jbgit.conflicts.merge",
+          "when": "view == jbgit.changes && viewItem == file.conflict",
+          "group": "0_conflict@1"
+        },
+        {
+          "command": "jbgit.conflicts.acceptYours",
+          "when": "view == jbgit.changes && (viewItem == file.conflict || viewItem == conflictsGroup)",
+          "group": "0_conflict@2"
+        },
+        {
+          "command": "jbgit.conflicts.acceptTheirs",
+          "when": "view == jbgit.changes && (viewItem == file.conflict || viewItem == conflictsGroup)",
+          "group": "0_conflict@3"
+        },
+        {
+          "command": "jbgit.conflicts.markResolved",
+          "when": "view == jbgit.changes && (viewItem == file.conflict || viewItem == conflictsGroup)",
+          "group": "0_conflict@4"
+        },
+        {
+          "command": "jbgit.resolveConflicts",
+          "when": "view == jbgit.changes && viewItem == conflictsGroup",
+          "group": "0_conflict@0"
         }
       ],
       "commandPalette": [
@@ -428,6 +495,26 @@
         {
           "command": "jbgit.log.createPatch",
           "when": "false"
+        },
+        {
+          "command": "jbgit.conflicts.merge",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.conflicts.acceptYours",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.conflicts.acceptTheirs",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.conflicts.markResolved",
+          "when": "false"
+        },
+        {
+          "command": "jbgit.log.interactiveRebase",
+          "when": "false"
         }
       ],
       "webview/context": [
@@ -485,6 +572,11 @@
           "command": "jbgit.log.createPatch",
           "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
           "group": "5_compare@2"
+        },
+        {
+          "command": "jbgit.log.interactiveRebase",
+          "when": "webviewId == 'jbgit.log' && webviewSection == 'commit'",
+          "group": "4_history@0"
         }
       ],
       "explorer/context": [
@@ -514,9 +606,10 @@
     "build": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
-    "test:unit": "tsc && mocha \"out/test/unit/**/*.test.js\" \"out/test/git/**/*.test.js\"",
+    "test:unit": "npm run clean && tsc && mocha \"out/test/unit/**/*.test.js\" \"out/test/git/**/*.test.js\"",
     "test": "npm run typecheck && npm run test:unit",
-    "test:e2e": "npm run build && tsc && env -u WAYLAND_DISPLAY -u XDG_SESSION_TYPE xvfb-run -a node out/test/e2e/runTest.js"
+    "test:e2e": "npm run clean && npm run build && tsc && env -u WAYLAND_DISPLAY -u XDG_SESSION_TYPE xvfb-run -a node out/test/e2e/runTest.js",
+    "clean": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\""
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

@@ -37,7 +37,7 @@ export async function showOperationActions(repo: Repo): Promise<void> {
   const pick = await vscode.window.showQuickPick(items, { title: `${op.name} in progress` });
   switch (pick?.id) {
     case 'resolve':
-      await vscode.commands.executeCommand('workbench.view.scm');
+      await vscode.commands.executeCommand('jbgit.resolveConflicts');
       break;
     case 'continue':
       if (unmerged.length) {

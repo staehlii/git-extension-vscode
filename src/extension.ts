@@ -6,12 +6,16 @@ import { showOperationActions } from './branches/operationActions';
 import { BranchStatusBar } from './branches/statusBar';
 import { CommitFn, registerCommitWindow } from './commit/commitCommands';
 import { CommitWindow } from './commit/commitWindow';
+import { registerConflictCommands } from './conflicts/conflictCommands';
+import { commitItem } from './git/commitPicker';
 import type { GitExtension } from './git/gitApi';
 import { GitCli } from './git/gitCli';
 import { Repo } from './git/repo';
 import { RepoManager } from './git/repoManager';
+import { listCommits } from './git/history';
 import { RevisionContentProvider, SCHEME } from './git/revisionContent';
 import { LogView, registerLogView } from './log/logView';
+import { onDidRebaseEditorLoad, openInteractiveRebase } from './rebase/rebaseEditor';
 import { gitConsole, showGitError } from './util/ui';
 
 /** Returned from activate(); used by the end-to-end tests. */
@@ -19,6 +23,7 @@ export interface ExtensionApi {
   commitWindow: CommitWindow;
   commit: CommitFn;
   log: LogView;
+  onDidRebaseEditorLoad: vscode.Event<string>;
 }
 
 export async function activate(context: vscode.ExtensionContext): Promise<ExtensionApi | undefined> {
@@ -63,7 +68,20 @@ export async function activate(context: vscode.ExtensionContext): Promise<Extens
   context.subscriptions.push(commitWindow);
   const commit = registerCommitWindow(context, commitWindow);
   const log = registerLogView(context, repos);
-  return { commitWindow, commit, log };
+  registerConflictCommands(context, repos, commitWindow);
+  context.subscriptions.push(
+    vscode.commands.registerCommand('jbgit.interactiveRebase', withRepo('Interactive Rebase', async (repo) => {
+      const commits = await listCommits(repo, ['HEAD'], 100);
+      const pick = await vscode.window.showQuickPick(commits.map(commitItem), {
+        title: 'Interactive Rebase: pick the oldest commit to change',
+        matchOnDescription: true,
+      });
+      if (pick) {
+        await openInteractiveRebase(context.extensionUri, repo, pick.commit.sha);
+      }
+    })),
+  );
+  return { commitWindow, commit, log, onDidRebaseEditorLoad };
 }
 
 export function deactivate(): void {}

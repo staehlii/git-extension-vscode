@@ -24,21 +24,23 @@ export async function recentBranchNames(repo: Repo): Promise<string[]> {
 }
 
 /** If an operation stopped with conflicts, tell the user instead of showing a raw error. Returns true if handled. */
-async function reportStoppedOperation(repo: Repo, title: string): Promise<boolean> {
+export async function reportStoppedOperation(repo: Repo, title: string): Promise<boolean> {
   const state = await repo.operationState();
   if (state === 'none') {
     return false;
   }
-  const choice = await vscode.window.showWarningMessage(
-    `${title}: stopped (${state}). Resolve the conflicts, then continue or abort.`,
-    'Resolve Conflicts',
-    'Continue / Abort…',
-  );
-  if (choice === 'Resolve Conflicts') {
-    await vscode.commands.executeCommand('workbench.view.scm');
-  } else if (choice === 'Continue / Abort…') {
-    await vscode.commands.executeCommand('jbgit.operationActions');
-  }
+  // Not awaited: the command finishes while the notification waits for the user.
+  void vscode.window
+    .showWarningMessage(`${title}: stopped (${state}). Resolve the conflicts, then continue or abort.`, 'Resolve Conflicts', 'Continue / Abort…')
+    .then((choice) => {
+      if (choice === 'Resolve Conflicts') {
+        return vscode.commands.executeCommand('jbgit.resolveConflicts');
+      }
+      if (choice === 'Continue / Abort…') {
+        return vscode.commands.executeCommand('jbgit.operationActions');
+      }
+      return undefined;
+    });
   return true;
 }
 

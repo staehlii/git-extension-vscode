@@ -5,6 +5,14 @@ import { ExecOptions, GitCli, GitResult } from './gitCli';
 
 export type OperationState = 'none' | 'merging' | 'rebasing' | 'cherry-picking' | 'reverting';
 
+/** "merge", "rebase", … for messages like "A merge is in progress". */
+export const OPERATION_NOUN: Record<Exclude<OperationState, 'none'>, string> = {
+  merging: 'merge',
+  rebasing: 'rebase',
+  'cherry-picking': 'cherry-pick',
+  reverting: 'revert',
+};
+
 export class Repo {
   private gitDirPromise: Promise<string> | undefined;
 

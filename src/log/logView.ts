@@ -3,11 +3,12 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { openFileDiff } from '../git/commitPicker';
 import { emptyTree } from '../git/history';
+import { openInteractiveRebase } from '../rebase/rebaseEditor';
 import { Repo } from '../git/repo';
 import { RepoManager } from '../git/repoManager';
 import { gitConsole, showGitError } from '../util/ui';
 import * as actions from './logActions';
-import { LogFilters } from './logModel';
+import { LOG_FORMAT, LogFilters, parseLog } from './logModel';
 import { branchesContaining, loadDetails, loadLog, loadRefs } from './logService';
 import type { CommitDetailsData, FilterKind, FilterSummary, FromWebview, LogCommit, ToWebview } from './protocol';
 
@@ -323,19 +324,29 @@ export class LogView implements vscode.WebviewViewProvider, vscode.Disposable {
 
   // ---- context menu targets ----
 
-  /** Commits a context-menu command applies to: the selection if it contains the clicked row, else the row. */
-  targets(arg?: RowContext): { repo: Repo; commits: LogCommit[]; head: string | undefined } | undefined {
+  /**
+   * Commits a context-menu command applies to: the selection if it contains the clicked row, else the
+   * row. Commits that are no longer loaded (log reloaded or filtered meanwhile) are read from git.
+   */
+  async targets(arg?: RowContext): Promise<{ repo: Repo; commits: LogCommit[]; head: string | undefined } | undefined> {
     const sha = arg?.sha ?? this.contextSha ?? this.selection[0];
-    if (!this.repo || !sha) {
+    const repo = this.repo ?? this.repos.current;
+    if (!repo || !sha) {
       return undefined;
     }
     const shas = this.selection.includes(sha) ? this.selection : [sha];
-    const order = new Map(this.commits.map((c, i) => [c.sha, i]));
-    const commits = shas
-      .map((s) => this.commits.find((c) => c.sha === s))
-      .filter((c): c is LogCommit => !!c)
-      .sort((a, b) => order.get(a.sha)! - order.get(b.sha)!); // newest first, as displayed
-    return commits.length ? { repo: this.repo, commits, head: this.head } : undefined;
+    const loaded = new Map(this.commits.map((c, i) => [c.sha, { c, i }]));
+    const commits: { c: LogCommit; i: number }[] = [];
+    for (const s of shas) {
+      const known = loaded.get(s);
+      const c = known?.c ?? parseLog(await repo.out(['log', '-1', `--format=${LOG_FORMAT}`, s, '--']))[0];
+      if (c) {
+        commits.push({ c, i: known?.i ?? Number.MAX_SAFE_INTEGER });
+      }
+    }
+    commits.sort((a, b) => a.i - b.i); // newest first, as displayed
+    const head = this.head ?? (await repo.exec(['rev-parse', '--verify', '-q', 'HEAD'], { allowFailure: true })).stdout.trim();
+    return commits.length ? { repo, commits: commits.map((x) => x.c), head } : undefined;
   }
 
   private html(webview: vscode.Webview): string {
@@ -387,9 +398,9 @@ export class LogView implements vscode.WebviewViewProvider, vscode.Disposable {
 export function registerLogView(context: vscode.ExtensionContext, repos: RepoManager): LogView {
   const log = new LogView(context.extensionUri, repos);
 
-  const onCommits = (title: string, fn: (t: NonNullable<ReturnType<LogView['targets']>>) => Promise<unknown>) =>
+  const onCommits = (title: string, fn: (t: NonNullable<Awaited<ReturnType<LogView['targets']>>>) => Promise<unknown>) =>
     async (arg?: RowContext) => {
-      const t = log.targets(arg);
+      const t = await log.targets(arg);
       if (!t) {
         return;
       }
@@ -423,6 +434,9 @@ export function registerLogView(context: vscode.ExtensionContext, repos: RepoMan
     vscode.commands.registerCommand('jbgit.log.undoCommit', onCommits('Undo Commit', (t) => actions.undoCommit(t.repo, t.commits[0], t.head))),
     vscode.commands.registerCommand('jbgit.log.reword', onCommits('Edit Commit Message', (t) => actions.rewordHead(t.repo, t.commits[0], t.head))),
     vscode.commands.registerCommand('jbgit.log.compareWithLocal', onCommits('Compare with Local', (t) => actions.compareWithLocal(t.repo, t.commits[0]))),
+    vscode.commands.registerCommand('jbgit.log.interactiveRebase', onCommits('Interactive Rebase', (t) =>
+      openInteractiveRebase(context.extensionUri, t.repo, t.commits[t.commits.length - 1].sha), // oldest selected
+    )),
     vscode.commands.registerCommand('jbgit.log.createPatch', onCommits('Create Patch', (t) => actions.createPatch(t.repo, oldestFirst(t.commits)))),
   );
   return log;
